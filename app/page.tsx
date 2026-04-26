@@ -678,12 +678,12 @@ function Reviews() {
 
 function Contact() {
   return (
-    <section className="mx-auto grid w-[min(1160px,calc(100%_-_32px))] grid-cols-2 items-stretch gap-[18px] py-[76px] max-[920px]:grid-cols-1 max-sm:w-[min(100%_-_24px,1160px)] max-sm:py-[54px]" id="contact">
+    <section className="mx-auto grid w-[min(1160px,calc(100%_-_32px))] gap-[18px] py-[76px] max-sm:w-[min(100%_-_24px,1160px)] max-sm:py-[54px]" id="contact">
       <div className="rounded-lg bg-night p-[26px] text-white">
         <h2 className="mb-5 text-[clamp(28px,4vw,44px)] font-extrabold leading-[1.15] text-white">
           门店信息
         </h2>
-        <ul className="m-0 grid list-none gap-4 p-0">
+        <ul className="m-0 grid list-none grid-cols-4 gap-4 p-0 max-[980px]:grid-cols-2 max-sm:grid-cols-1">
           {[
             {
               Icon: MapPin,
@@ -705,15 +705,15 @@ function Contact() {
         </ul>
       </div>
       <div
-        className="relative aspect-video min-h-[390px] overflow-hidden rounded-lg border border-line bg-[#eef6f2] shadow-map max-sm:min-h-[330px]"
+        className="relative min-h-[560px] overflow-hidden rounded-lg border border-line bg-[#eef6f2] shadow-map max-[920px]:min-h-[460px] max-sm:min-h-[330px]"
         aria-label="泡泡爪 Pet Spa 门店位置示意图，地址为上海市普陀区宜川路街道陕西北路 1620 号"
       >
         <Image
-          className="object-cover"
+          className="object-contain"
           src="/assets/store-map-shaanxi-1620.png"
           alt="泡泡爪 Pet Spa 位于上海市普陀区宜川路街道陕西北路 1620 号的可爱宠物店风格地图"
           fill
-          sizes="(max-width: 920px) 100vw, 580px"
+          sizes="(max-width: 1160px) 100vw, 1160px"
         />
       </div>
     </section>
