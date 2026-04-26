@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -215,7 +215,41 @@ const reviews: ReviewItem[] = [
     name: "赵女士",
     pet: "比熊主人",
   },
+  {
+    quote: "皮肤敏感的地方会提前标记，洗护后还会提醒回家观察，服务很细。",
+    name: "陈先生",
+    pet: "柴犬主人",
+  },
+  {
+    quote: "第一次带幼犬洗澡，本来很担心，结果全程都很温柔，还拍了状态照片。",
+    name: "吴女士",
+    pet: "泰迪主人",
+  },
+  {
+    quote: "长毛猫打结处理得很耐心，没有为了省时间直接大面积剃掉。",
+    name: "许女士",
+    pet: "缅因猫主人",
+  },
+  {
+    quote: "每次来都会对比上次毛发和耳道情况，像做了一份小小的护理档案。",
+    name: "何先生",
+    pet: "雪纳瑞主人",
+  },
+  {
+    quote: "店里味道很干净，等待区能看到操作，不会有宠物被带走后看不见的焦虑。",
+    name: "唐女士",
+    pet: "博美主人",
+  },
+  {
+    quote: "洗完毛发蓬松但不刺鼻，美容师也会讲清楚哪些护理没必要加钱做。",
+    name: "马先生",
+    pet: "英短主人",
+  },
 ];
+
+const reviewGroups = Array.from({ length: Math.ceil(reviews.length / 3) }, (_, index) =>
+  reviews.slice(index * 3, index * 3 + 3),
+);
 
 const iconStroke = 2.1;
 
@@ -653,23 +687,87 @@ function EnvironmentCarousel() {
 }
 
 function Reviews() {
+  const [activeReviewGroup, setActiveReviewGroup] = useState(0);
+
+  const showReviewGroup = (index: number) => {
+    setActiveReviewGroup((index + reviewGroups.length) % reviewGroups.length);
+  };
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveReviewGroup((current) => (current + 1) % reviewGroups.length);
+    }, 5200);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <section className="mx-auto w-[min(1160px,calc(100%_-_32px))] py-[76px] max-sm:w-[min(100%_-_24px,1160px)] max-sm:py-[54px]" id="reviews">
-      <SectionHead title="客户评价">
-        每次服务结束都会记录宠物状态，长期客户可以追踪毛发与皮肤变化。
-      </SectionHead>
-      <div className="grid grid-cols-3 gap-4 max-[920px]:grid-cols-2 max-sm:grid-cols-1">
-        {reviews.map((review) => (
-          <article className="rounded-lg border border-line bg-white p-5" key={review.name}>
-            <div className="mb-3 flex gap-[3px] text-[#e7aa10]" aria-label="五星评价">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Star key={index} fill="currentColor" strokeWidth={iconStroke} />
+      <div className="mb-7 flex items-end justify-between gap-5 max-sm:block">
+        <SectionHead title="客户评价">
+          每次服务结束都会记录宠物状态，长期客户可以追踪毛发与皮肤变化。
+        </SectionHead>
+        <div className="flex shrink-0 items-center gap-2 max-sm:mt-4">
+          <button
+            className="grid h-10 w-10 place-items-center rounded-lg border border-line bg-white text-ink transition hover:-translate-y-0.5 hover:border-teal"
+            type="button"
+            aria-label="上一组客户评价"
+            onClick={() => showReviewGroup(activeReviewGroup - 1)}
+          >
+            <ChevronLeft strokeWidth={iconStroke} />
+          </button>
+          <button
+            className="grid h-10 w-10 place-items-center rounded-lg border border-line bg-white text-ink transition hover:-translate-y-0.5 hover:border-teal"
+            type="button"
+            aria-label="下一组客户评价"
+            onClick={() => showReviewGroup(activeReviewGroup + 1)}
+          >
+            <ChevronRight strokeWidth={iconStroke} />
+          </button>
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-lg border border-line bg-[#f8fbf8]" aria-live="polite">
+        <div
+          className="flex transition-transform duration-700 ease-out will-change-transform"
+          style={{ transform: `translateX(-${activeReviewGroup * 100}%)` }}
+        >
+          {reviewGroups.map((group, groupIndex) => (
+            <div
+              className="grid flex-[0_0_100%] grid-cols-3 gap-4 p-4 max-[920px]:grid-cols-2 max-sm:grid-cols-1 max-sm:p-3"
+              key={groupIndex}
+            >
+              {group.map((review) => (
+                <article
+                  className="flex min-h-[218px] flex-col rounded-lg border border-line bg-white p-5 shadow-[0_14px_34px_rgba(24,42,38,0.06)]"
+                  key={review.name}
+                >
+                  <div className="mb-3 flex gap-[3px] text-[#e7aa10]" aria-label="五星评价">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Star key={index} fill="currentColor" strokeWidth={iconStroke} />
+                    ))}
+                  </div>
+                  <p className="mb-5 text-[#354052]">“{review.quote}”</p>
+                  <div className="mt-auto border-t border-line pt-4">
+                    <strong className="block">{review.name}</strong>
+                    <span className="text-[13px] text-muted">{review.pet}</span>
+                  </div>
+                </article>
               ))}
             </div>
-            <p className="mb-4 text-[#354052]">{review.quote}</p>
-            <strong className="block">{review.name}</strong>
-            <span className="text-[13px] text-muted">{review.pet}</span>
-          </article>
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 flex justify-center gap-2" aria-label="客户评价轮播选择">
+        {reviewGroups.map((_, index) => (
+          <button
+            className={`h-2.5 rounded-full p-0 transition-all ${
+              activeReviewGroup === index ? "w-8 bg-teal" : "w-2.5 bg-[#bfd7d1]"
+            }`}
+            type="button"
+            aria-label={`查看第 ${index + 1} 组客户评价`}
+            key={index}
+            onClick={() => showReviewGroup(index)}
+          />
         ))}
       </div>
     </section>
