@@ -325,6 +325,9 @@ function BookingForm({
         <FormField label="手机号" htmlFor="phone">
           <input id="phone" name="phone" placeholder="138 0000 0000" required />
         </FormField>
+        <FormField label="期望到店时间" htmlFor="arrivalTime" full>
+          <input id="arrivalTime" name="arrivalTime" type="datetime-local" required />
+        </FormField>
         <FormField label="宠物类型" htmlFor="pet">
           <select id="pet" name="pet">
             <option>小型犬</option>
