@@ -247,6 +247,20 @@ const reviews: ReviewItem[] = [
   },
 ];
 
+function getTomorrowMorningArrivalTime() {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  date.setHours(9, 30, 0, 0);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 const reviewGroups = Array.from({ length: Math.ceil(reviews.length / 3) }, (_, index) =>
   reviews.slice(index * 3, index * 3 + 3),
 );
@@ -344,6 +358,8 @@ function BookingForm({
 }: {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
+  const defaultArrivalTime = getTomorrowMorningArrivalTime();
+
   return (
     <form
       className="rounded-lg bg-white/95 p-6 text-ink shadow-soft"
@@ -360,7 +376,13 @@ function BookingForm({
           <input id="phone" name="phone" placeholder="138 0000 0000" required />
         </FormField>
         <FormField label="期望到店时间" htmlFor="arrivalTime" full>
-          <input id="arrivalTime" name="arrivalTime" type="datetime-local" required />
+          <input
+            defaultValue={defaultArrivalTime}
+            id="arrivalTime"
+            name="arrivalTime"
+            type="datetime-local"
+            required
+          />
         </FormField>
         <FormField label="宠物类型" htmlFor="pet">
           <select id="pet" name="pet">
