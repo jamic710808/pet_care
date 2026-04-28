@@ -61,6 +61,8 @@ type ReviewItem = {
   pet: string;
 };
 
+type BookingSubmitState = "idle" | "submitting" | "success" | "error";
+
 const prices: Record<PriceCategory, PriceItem[]> = {
   small: [
     {
@@ -355,10 +357,13 @@ function Header() {
 
 function BookingForm({
   onSubmit,
+  submitState,
 }: {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  submitState: BookingSubmitState;
 }) {
   const defaultArrivalTime = getTomorrowMorningArrivalTime();
+  const isSubmitting = submitState === "submitting";
 
   return (
     <form
@@ -410,10 +415,11 @@ function BookingForm({
         <div className="col-span-full">
           <button
             className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-teal px-[18px] font-bold text-white shadow-[0_10px_26px_rgba(15,123,117,0.22)] transition hover:-translate-y-0.5"
+            disabled={isSubmitting}
             type="submit"
           >
             <Send strokeWidth={iconStroke} />
-            发送预约
+            {isSubmitting ? "提交中..." : "发送预约"}
           </button>
         </div>
       </div>
@@ -448,8 +454,10 @@ function FormField({
 
 function Hero({
   onBookingSubmit,
+  submitState,
 }: {
   onBookingSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  submitState: BookingSubmitState;
 }) {
   return (
     <section className="relative isolate grid min-h-[calc(100vh-72px)] items-center overflow-hidden bg-[linear-gradient(90deg,rgba(15,25,35,0.72),rgba(15,25,35,0.38)_48%,rgba(15,25,35,0.1)),url('https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=1800&q=82')] bg-cover bg-center after:absolute after:inset-x-0 after:bottom-0 after:-z-10 after:h-24 after:bg-gradient-to-b after:from-transparent after:to-paper max-sm:min-h-0">
@@ -498,7 +506,7 @@ function Hero({
           </div>
         </div>
         <div className="max-[920px]:max-w-[560px]">
-          <BookingForm onSubmit={onBookingSubmit} />
+          <BookingForm onSubmit={onBookingSubmit} submitState={submitState} />
         </div>
       </div>
     </section>
@@ -852,28 +860,78 @@ function Footer() {
 }
 
 export default function Home() {
-  const [toastVisible, setToastVisible] = useState(false);
+  const [bookingSubmitState, setBookingSubmitState] =
+    useState<BookingSubmitState>("idle");
+  const [toastMessage, setToastMessage] = useState("");
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleBookingSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const showToast = (message: string, state: BookingSubmitState) => {
+    setToastMessage(message);
+    setBookingSubmitState(state);
+
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    toastTimeoutRef.current = setTimeout(() => {
+      setBookingSubmitState("idle");
+    }, 2800);
+  };
+
+  const handleBookingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
     }
 
-    setToastVisible(true);
-    event.currentTarget.reset();
-    toastTimeoutRef.current = setTimeout(() => {
-      setToastVisible(false);
-    }, 2800);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setBookingSubmitState("submitting");
+
+    try {
+      const response = await fetch("/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          phone: formData.get("phone"),
+          arrivalTime: formData.get("arrivalTime"),
+          pet: formData.get("pet"),
+          service: formData.get("service"),
+          note: formData.get("note"),
+        }),
+      });
+
+      if (!response.ok) {
+        const result = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+
+        throw new Error(result?.message ?? "预约提交失败，请稍后再试。");
+      }
+
+      form.reset();
+      showToast("预约信息已收到，门店会尽快联系你确认时间。", "success");
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "预约提交失败，请稍后再试。",
+        "error",
+      );
+    }
   };
 
   return (
     <>
       <Header />
       <main id="top">
-        <Hero onBookingSubmit={handleBookingSubmit} />
+        <Hero
+          onBookingSubmit={handleBookingSubmit}
+          submitState={bookingSubmitState}
+        />
         <Services />
         <Process />
         <Pricing />
@@ -884,12 +942,14 @@ export default function Home() {
       <Footer />
       <div
         className={`pointer-events-none fixed bottom-[18px] right-[18px] z-20 max-w-[340px] rounded-lg bg-night px-4 py-3.5 text-white shadow-soft transition ${
-          toastVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          bookingSubmitState === "success" || bookingSubmitState === "error"
+            ? "translate-y-0 opacity-100"
+            : "translate-y-6 opacity-0"
         }`}
         role="status"
         aria-live="polite"
       >
-        预约信息已收到，门店会尽快联系你确认时间。
+        {toastMessage}
       </div>
     </>
   );
