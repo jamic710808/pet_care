@@ -68,51 +68,51 @@ const prices: Record<PriceCategory, PriceItem[]> = {
     {
       name: "基礎洗護",
       description: "適合 8kg 內小型犬，含耳道、指甲、腳底毛護理",
-      amount: "¥88",
+      amount: "NT$ 400",
     },
     {
       name: "洗護加精修",
       description: "含全身造型、面部修剪和尾部細節處理",
-      amount: "¥168",
+      amount: "NT$ 770",
     },
     {
       name: "深層護毛",
       description: "適合掉毛期、毛躁、静電明顯的寵物",
-      amount: "¥128",
+      amount: "NT$ 590",
     },
   ],
   medium: [
     {
       name: "基礎洗護",
       description: "適合 8-22kg 中型犬，按毛量調整時長",
-      amount: "¥138",
+      amount: "NT$ 630",
     },
     {
       name: "輪廓修剪",
-      description: "腹底、臀部、腳邊和胸線整理",
-      amount: "¥218",
+      description: "腹底、臀部、腳邊 and 胸線整理",
+      amount: "NT$ 1000",
     },
     {
       name: "去浮毛護理",
       description: "洗前梳理、浴後分層吹乾和護毛護理",
-      amount: "¥188",
+      amount: "NT$ 860",
     },
   ],
   cat: [
     {
       name: "短毛貓洗護",
       description: "獨立貓咪時段，含指甲和耳部基礎清潔",
-      amount: "¥168",
+      amount: "NT$ 770",
     },
     {
       name: "長毛貓洗護",
       description: "重點梳開胸腹、腋下和尾部毛髮",
-      amount: "¥228",
+      amount: "NT$ 1050",
     },
     {
       name: "局部剃毛",
       description: "腳底、腹部或輕度打結區域處理",
-      amount: "¥68 起",
+      amount: "NT$ 310 起",
     },
   ],
 };
@@ -127,28 +127,28 @@ const services: ServiceItem[] = [
   {
     title: "基礎洗護",
     description: "清潔耳道、修剪腳底毛、指甲護理、低敏洗浴和分區吹乾。",
-    price: "¥88 起",
+    price: "NT$ 400 起",
     Icon: Bath,
     iconClassName: "bg-sun text-[#11251f]",
   },
   {
     title: "精緻造型",
     description: "按品種和生活習慣設計造型，適合貴賓、比熊、雪納瑞等犬種。",
-    price: "¥168 起",
+    price: "NT$ 770 起",
     Icon: Scissors,
     iconClassName: "bg-coral text-white",
   },
   {
     title: "皮毛護理",
     description: "針對打結、掉毛、乾燥和敏感皮膚，搭配護毛素與保養梳理。",
-    price: "¥128 起",
+    price: "NT$ 590 起",
     Icon: Droplets,
     iconClassName: "bg-blue text-white",
   },
   {
     title: "幼寵適應",
     description: "縮短流程、降低噪音、正向獎勵，幫助幼寵建立温和洗護體驗。",
-    price: "¥68 起",
+    price: "NT$ 310 起",
     Icon: HeartHandshake,
     iconClassName: "bg-mint text-[#11251f]",
   },
@@ -837,8 +837,8 @@ function Contact() {
         aria-label="泡泡爪 Pet Spa 門市位置示意圖，地址為桃園市平鎮區金陵路四段九十巷十號"
       >
         <Image
-          className="object-contain"
-          src="/assets/store-map-shaanxi-1620.png"
+          className="object-cover"
+          src="/assets/store-map-new.png"
           alt="泡泡爪 Pet Spa 位於桃園市平鎮區金陵路四段九十巷十號的可愛寵物店風格地圖"
           fill
           sizes="(max-width: 1160px) 100vw, 1160px"
