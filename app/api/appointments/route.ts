@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPool } from "@/lib/db";
+import { query } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as BookingPayload;
   } catch {
-    return NextResponse.json({ message: "预约信息格式不正确。" }, { status: 400 });
+    return NextResponse.json({ message: "預約資訊格式不正確。" }, { status: 400 });
   }
 
   const customerName = normalizeText(body.name, 80);
@@ -46,16 +46,16 @@ export async function POST(request: Request) {
     !arrivalTimeValue ||
     Number.isNaN(arrivalTime.getTime())
   ) {
-    return NextResponse.json({ message: "请完整填写预约信息。" }, { status: 400 });
+    return NextResponse.json({ message: "請完整填寫預約資訊。" }, { status: 400 });
   }
 
   try {
-    const result = await getPool().query<{ id: string }>(
-      `insert into public.appointments
+    const rows = await query<{ id: string }>(
+      `INSERT INTO public.appointments
         (customer_name, phone, arrival_time, pet_type, service_type, note, source)
-       values
+       VALUES
         ($1, $2, $3, $4, $5, $6, 'website')
-       returning id`,
+       RETURNING id`,
       [
         customerName,
         phone,
@@ -63,18 +63,18 @@ export async function POST(request: Request) {
         petType,
         serviceType,
         note || null,
-      ],
+      ]
     );
 
     return NextResponse.json(
-      { id: result.rows[0]?.id, message: "预约信息已收到。" },
-      { status: 201 },
+      { id: rows[0]?.id, message: "預約資訊已收到。" },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Failed to create appointment", error);
     return NextResponse.json(
-      { message: "预约提交失败，请稍后再试。" },
-      { status: 500 },
+      { message: "預約提交失敗，請稍後再試。" },
+      { status: 500 }
     );
   }
 }

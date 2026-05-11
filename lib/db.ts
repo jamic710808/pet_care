@@ -1,52 +1,26 @@
-import { Pool } from "pg";
+import { neon } from "@neondatabase/serverless";
 
-declare global {
-  var appointmentsPool:
-    | {
-        connectionString: string;
-        pool: Pool;
-      }
-    | undefined;
-}
+// NOTE: 使用 Neon serverless driver，在 Vercel Edge 與 Node.js 環境中均可使用
+// 環境變數 POSTGRES_URL 由 Vercel 在連接 Neon 資料庫後自動注入
+function getSql() {
+  const url = process.env.POSTGRES_URL;
 
-function getConnectionString() {
-  const connectionString = process.env.SUPABASE_POSTGRES_SESSION_POOL_URL;
-
-  if (!connectionString) {
-    throw new Error("Missing SUPABASE_POSTGRES_SESSION_POOL_URL");
+  if (!url) {
+    throw new Error(
+      "Missing POSTGRES_URL environment variable. " +
+        "請至 Vercel Dashboard → Storage → 建立 Postgres (Neon) 資料庫並連接至此專案。"
+    );
   }
 
-  return connectionString;
+  return neon(url);
 }
 
-function getPoolConnectionString(connectionString: string) {
-  const url = new URL(connectionString);
-
-  url.searchParams.delete("sslmode");
-  url.searchParams.delete("uselibpqcompat");
-
-  return url.toString();
-}
-
-export function getPool() {
-  const connectionString = getConnectionString();
-
-  if (globalThis.appointmentsPool?.connectionString !== connectionString) {
-    void globalThis.appointmentsPool?.pool.end();
-
-    const pool = new Pool({
-      connectionString: getPoolConnectionString(connectionString),
-      connectionTimeoutMillis: 10_000,
-      idleTimeoutMillis: 30_000,
-      max: 5,
-      ssl: { rejectUnauthorized: false },
-    });
-
-    globalThis.appointmentsPool = {
-      connectionString,
-      pool,
-    };
-  }
-
-  return globalThis.appointmentsPool.pool;
+// NOTE: 輔助函數，執行單一 SQL 查詢並回傳結果列
+export async function query<T = Record<string, unknown>>(
+  sql: string,
+  params?: unknown[]
+): Promise<T[]> {
+  const neonSql = getSql();
+  const result = await neonSql(sql, params ?? []);
+  return result as T[];
 }
