@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 
-// NOTE: 使用 Neon serverless driver，在 Vercel Edge 與 Node.js 環境中均可使用
-// 環境變數 POSTGRES_URL 由 Vercel 在連接 Neon 資料庫後自動注入
+// NOTE: Neon serverless driver — 使用 .query() 方法支援動態 SQL 字串與參數陣列
+// 環境變數 POSTGRES_URL 由 Vercel 在連接 Neon Postgres 資料庫後自動注入
 function getSql() {
   const url = process.env.POSTGRES_URL;
 
@@ -15,12 +15,15 @@ function getSql() {
   return neon(url);
 }
 
-// NOTE: 輔助函數，執行單一 SQL 查詢並回傳結果列
+// NOTE: 使用 Neon 官方的 .query() 方法，與原有 pg 的 query(sql, params) 介面相容
+// 回傳型別定義為 any[] 再由外層強制轉型，避免 Neon 泛型型別限制問題
 export async function query<T = Record<string, unknown>>(
-  sql: string,
-  params?: unknown[]
+  sqlStr: string,
+  params: unknown[] = []
 ): Promise<T[]> {
-  const neonSql = getSql();
-  const result = await neonSql(sql, params ?? []);
-  return result as T[];
+  const sql = getSql();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await sql.query(sqlStr, params as any[]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (result as any).rows as T[];
 }
