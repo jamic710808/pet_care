@@ -1,25 +1,30 @@
 import { Pool } from "pg";
 
 // NOTE: 使用標準 pg 套件連接 Neon Postgres
-// POSTGRES_URL 由 Vercel 連接 Neon Storage 後自動注入
-// 本地開發需從 Vercel Dashboard → Settings → Environment Variables 複製此值到 .env
+// 同時支援 POSTGRES_URL（Vercel 注入）與 DATABASE_URL（Neon 原生格式）
 
 declare global {
   var pgPool: Pool | undefined;
+  var pgPoolConnectionString: string | undefined;
 }
 
 function getPool(): Pool {
-  const connectionString = process.env.POSTGRES_URL;
+  // NOTE: 同時支援兩種連線字串格式，POSTGRES_URL 優先
+  const connectionString =
+    process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
   if (!connectionString) {
     throw new Error(
-      "Missing POSTGRES_URL — 請至 Vercel Dashboard → Storage → 建立 Neon 資料庫並連接到此專案，" +
-        "或將 POSTGRES_URL 複製到本地 .env 檔案。"
+      "Missing POSTGRES_URL 或 DATABASE_URL — 請確認 .env 檔案已正確設定資料庫連線字串。"
     );
   }
 
-  // NOTE: 使用 globalThis 快取 Pool 避免在 Next.js HMR 時重複建立連線
-  if (!globalThis.pgPool) {
+  // NOTE: 若連線字串有變動（如 HMR 重載 .env），重建 Pool
+  if (!globalThis.pgPool || globalThis.pgPoolConnectionString !== connectionString) {
+    if (globalThis.pgPool) {
+      globalThis.pgPool.end().catch(() => {});
+    }
+    globalThis.pgPoolConnectionString = connectionString;
     globalThis.pgPool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false },

@@ -378,7 +378,14 @@ function BookingForm({
           <input id="name" name="name" placeholder="你的稱呼" required />
         </FormField>
         <FormField label="手機號" htmlFor="phone">
-          <input id="phone" name="phone" placeholder="138 0000 0000" required />
+          <input 
+            id="phone" 
+            name="phone" 
+            placeholder="0912-345-678" 
+            pattern="09\d{2}-?\d{3}-?\d{3}"
+            title="請輸入正確的臺灣手機號碼（例如：0912-345-678 或 0912345678）"
+            required 
+          />
         </FormField>
         <FormField label="期望到店時間" htmlFor="arrivalTime" full>
           <input

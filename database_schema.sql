@@ -1,5 +1,4 @@
--- 建立預約表（如果尚未建立）
--- 請在 Vercel Dashboard → Storage → 您的 Neon 資料庫 → Query 介面中執行此腳本
+-- 建立預約表
 CREATE TABLE IF NOT EXISTS public.appointments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     customer_name TEXT NOT NULL,
@@ -9,9 +8,20 @@ CREATE TABLE IF NOT EXISTS public.appointments (
     service_type TEXT NOT NULL,
     note TEXT,
     source TEXT DEFAULT 'website',
-    status TEXT DEFAULT 'pending', -- 狀態: pending, confirmed, completed, cancelled
+    status TEXT DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 如果資料表已存在但缺少 status 欄位，可執行：
--- ALTER TABLE public.appointments ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+-- 建立管理員資料表
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 初始化預設帳號 (帳號: ADMIN, 密碼: ADMIN)
+-- 注意：這裡使用了一個預先計算好的 bcrypt hash
+INSERT INTO public.admin_users (username, password_hash)
+VALUES ('ADMIN', '$2b$10$idnderzo5mmhcHPkcEHsbuKde2lp1Wty831dcGcNQ1Z25hmebl02.') 
+ON CONFLICT (username) DO NOTHING;
