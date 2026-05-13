@@ -3,12 +3,15 @@ CREATE TABLE IF NOT EXISTS public.appointments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     customer_name TEXT NOT NULL,
     phone TEXT NOT NULL,
+    customer_email TEXT NOT NULL,
     arrival_time TIMESTAMPTZ NOT NULL,
     pet_type TEXT NOT NULL,
     service_type TEXT NOT NULL,
     note TEXT,
     source TEXT DEFAULT 'website',
     status TEXT DEFAULT 'pending',
+    confirmation_email_sent_at TIMESTAMPTZ,
+    confirmation_email_error TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

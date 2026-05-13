@@ -387,6 +387,15 @@ function BookingForm({
             required 
           />
         </FormField>
+        <FormField label="Email" htmlFor="email" full>
+          <input
+            id="email"
+            name="email"
+            placeholder="customer@example.com"
+            type="email"
+            required
+          />
+        </FormField>
         <FormField label="期望到店時間" htmlFor="arrivalTime" full>
           <input
             defaultValue={defaultArrivalTime}
@@ -906,6 +915,7 @@ export default function Home() {
         body: JSON.stringify({
           name: formData.get("name"),
           phone: formData.get("phone"),
+          email: formData.get("email"),
           arrivalTime: formData.get("arrivalTime"),
           pet: formData.get("pet"),
           service: formData.get("service"),

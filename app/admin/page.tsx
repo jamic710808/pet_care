@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Calendar, 
   Clock, 
   User, 
   Phone, 
+  Mail,
   PawPrint, 
   Settings, 
   CheckCircle, 
@@ -23,11 +24,14 @@ type Appointment = {
   id: string;
   customer_name: string;
   phone: string;
+  customer_email: string;
   arrival_time: string;
   pet_type: string;
   service_type: string;
   note: string | null;
   status: string;
+  confirmation_email_sent_at: string | null;
+  confirmation_email_error: string | null;
   created_at: string;
 };
 
@@ -42,7 +46,7 @@ export default function AdminDashboard() {
   const [passwordMessage, setPasswordMessage] = useState({ text: "", isError: false });
   const router = useRouter();
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch("/api/admin/appointments");
@@ -55,7 +59,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
@@ -115,8 +119,12 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchAppointments();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchAppointments();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchAppointments]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -227,6 +235,23 @@ export default function AdminDashboard() {
                             <Phone size={14} className="text-gray-400" />
                             {apt.phone}
                           </span>
+                          <span className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                            <Mail size={14} className="text-gray-400" />
+                            {apt.customer_email || "-"}
+                          </span>
+                          {apt.confirmation_email_sent_at && (
+                            <span className="mt-1 text-xs text-green-700">
+                              確認信已寄出
+                            </span>
+                          )}
+                          {apt.confirmation_email_error && (
+                            <span
+                              className="mt-1 text-xs text-red-600"
+                              title={apt.confirmation_email_error}
+                            >
+                              確認信寄送失敗
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
